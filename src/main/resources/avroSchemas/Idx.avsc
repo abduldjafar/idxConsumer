@@ -1,0 +1,278 @@
+{
+  "connect.doc": "This schema is used to store the value of the JMS message.",
+  "connect.name": "io.confluent.connect.jms.Value",
+  "fields": [
+    {
+      "default": null,
+      "name": "messageID",
+      "type": [
+        "null",
+        {
+          "connect.doc": "This field stores the value of `Message.getJMSMessageID() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSMessageID()>`_.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "messageType",
+      "type": {
+        "connect.doc": "This field stores the type of message that was received. This corresponds to the subinterfaces of `Message <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html>`_. `BytesMessage <http://docs.oracle.com/javaee/6/api/javax/jms/BytesMessage.html>`_ = `bytes`, `MapMessage <http://docs.oracle.com/javaee/6/api/javax/jms/MapMessage.html>`_ = `map`, `ObjectMessage <http://docs.oracle.com/javaee/6/api/javax/jms/ObjectMessage.html>`_ = `object`, `StreamMessage <http://docs.oracle.com/javaee/6/api/javax/jms/StreamMessage.html>`_ = `stream` and `TextMessage <http://docs.oracle.com/javaee/6/api/javax/jms/TextMessage.html>`_ = `text`. The corresponding field will be populated with the values from the respective Message subinterface.",
+        "type": "string"
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": {
+        "connect.doc": "Data from the `getJMSTimestamp() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSTimestamp()>`_ method.",
+        "type": "long"
+      }
+    },
+    {
+      "name": "deliveryMode",
+      "type": {
+        "connect.doc": "This field stores the value of `Message.getJMSDeliveryMode() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSDeliveryMode()>`_.",
+        "type": "int"
+      }
+    },
+    {
+      "default": null,
+      "name": "correlationID",
+      "type": [
+        "null",
+        {
+          "connect.doc": "This field stores the value of `Message.getJMSCorrelationID() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSCorrelationID()>`_.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "replyTo",
+      "type": [
+        "null",
+        {
+          "connect.doc": "This schema is used to represent a JMS Destination, and is either `queue <http://docs.oracle.com/javaee/6/api/javax/jms/Queue.html>`_ or `topic <http://docs.oracle.com/javaee/6/api/javax/jms/Topic.html>`_.",
+          "connect.name": "io.confluent.connect.jms.Destination",
+          "fields": [
+            {
+              "name": "destinationType",
+              "type": {
+                "connect.doc": "The type of JMS Destination, and either ``queue`` or ``topic``.",
+                "type": "string"
+              }
+            },
+            {
+              "name": "name",
+              "type": {
+                "connect.doc": "The name of the destination. This will be the value of `Queue.getQueueName() <http://docs.oracle.com/javaee/6/api/javax/jms/Queue.html#getQueueName()>`_ or `Topic.getTopicName() <http://docs.oracle.com/javaee/6/api/javax/jms/Topic.html#getTopicName()>`_.",
+                "type": "string"
+              }
+            }
+          ],
+          "name": "Destination",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "destination",
+      "type": [
+        "null",
+        "Destination"
+      ]
+    },
+    {
+      "name": "redelivered",
+      "type": {
+        "connect.doc": "This field stores the value of `Message.getJMSRedelivered() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSRedelivered()>`_.",
+        "type": "boolean"
+      }
+    },
+    {
+      "default": null,
+      "name": "type",
+      "type": [
+        "null",
+        {
+          "connect.doc": "This field stores the value of `Message.getJMSType() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSType()>`_.",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "expiration",
+      "type": {
+        "connect.doc": "This field stores the value of `Message.getJMSExpiration() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSExpiration()>`_.",
+        "type": "long"
+      }
+    },
+    {
+      "name": "priority",
+      "type": {
+        "connect.doc": "This field stores the value of `Message.getJMSPriority() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getJMSPriority()>`_.",
+        "type": "int"
+      }
+    },
+    {
+      "name": "properties",
+      "type": {
+        "connect.doc": "This field stores the data from all of the properties for the Message indexed by their propertyName.",
+        "type": "map",
+        "values": {
+          "connect.doc": "This schema is used to store the data that is found in the properties of the message. To ensure that the proper type mappings are preserved field ``propertyType`` stores the value type for the field. The corresponding field in the schema will contain the data for the property. This ensures that the data is retrievable as the type returned by `Message.getObjectProperty() <http://docs.oracle.com/javaee/6/api/javax/jms/Message.html#getObjectProperty(java.lang.String)>`_.",
+          "connect.name": "io.confluent.connect.jms.PropertyValue",
+          "fields": [
+            {
+              "name": "propertyType",
+              "type": {
+                "connect.doc": "The java type of the property on the Message. One of ``boolean``, ``byte``, ``short``, ``integer``, ``long``, ``float``, ``double``, or ``string``, or ``null-value``.",
+                "type": "string"
+              }
+            },
+            {
+              "default": null,
+              "name": "boolean",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a boolean. Null unless ``propertyType`` is set to ``boolean``.",
+                  "type": "boolean"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "byte",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a byte. Null unless ``propertyType`` is set to ``byte``.",
+                  "connect.type": "int8",
+                  "type": "int"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "short",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a short. Null unless ``propertyType`` is set to ``short``.",
+                  "connect.type": "int16",
+                  "type": "int"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "integer",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a integer. Null unless ``propertyType`` is set to ``integer``.",
+                  "type": "int"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "long",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a long. Null unless ``propertyType`` is set to ``long``.",
+                  "type": "long"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "float",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a float. Null unless ``propertyType`` is set to ``float``.",
+                  "type": "float"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "double",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a double. Null unless ``propertyType`` is set to ``double``.",
+                  "type": "double"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "string",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a string. Null unless ``propertyType`` is set to ``string``.",
+                  "type": "string"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "bytes",
+              "type": [
+                "null",
+                {
+                  "connect.doc": "The value stored as a byte[]. Null unless ``propertyType`` is set to ``bytes``.",
+                  "type": "bytes"
+                }
+              ]
+            }
+          ],
+          "name": "PropertyValue",
+          "type": "record"
+        }
+      }
+    },
+    {
+      "default": null,
+      "name": "bytes",
+      "type": [
+        "null",
+        {
+          "connect.doc": "This field stores the value from `BytesMessage.html.readBytes(byte[]) <http://docs.oracle.com/javaee/6/api/javax/jms/BytesMessage.html#readBytes(byte[])>`_.",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "map",
+      "type": [
+        "null",
+        {
+          "connect.doc": "This field stores the data from all of the map entries returned from `MapMessage.getMapNames() <http://docs.oracle.com/javaee/6/api/javax/jms/MapMessage.html#getMapNames()>`_ for the Message indexed by their key.",
+          "type": "map",
+          "values": "PropertyValue"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "text",
+      "type": [
+        "null",
+        {
+          "connect.doc": "This field stores the value from `TextMessage.html.getText() <http://docs.oracle.com/javaee/6/api/javax/jms/TextMessage.html#getText()>`_.",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "name": "Value",
+  "namespace": "io.confluent.connect.jms",
+  "type": "record"
+}
