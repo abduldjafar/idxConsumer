@@ -1,6 +1,7 @@
 package idx.kafka.services;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.confluent.connect.jms.Value;
@@ -16,17 +17,23 @@ import java.nio.file.Paths;
 public class TopicProcessing {
 
     public  static String saveTofile(JsonObject obj) throws IOException {
+        byte[] bytesFileStr = obj.get("bytes") != JsonNull.INSTANCE ? obj.get("bytes").getAsString().getBytes() : null;
 
+        if (bytesFileStr != null) {
+            JsonObject properties = obj.get("properties").getAsJsonObject();
+            JsonObject filenameObj = properties.get("idxFileName") != JsonNull.INSTANCE? properties.get("idxFileName").getAsJsonObject():null;
+            String filename = filenameObj.get("string") != JsonNull.INSTANCE? filenameObj.get("string").getAsString(): null;
 
-        byte[] bytesFileStr = obj.get("bytes").getAsString().getBytes();
-        JsonObject properties = obj.get("properties").getAsJsonObject();
-        JsonObject filenameObj = properties.get("idxFileName").getAsJsonObject();
-        String filename = filenameObj.get("string").getAsString();
+            if (filename != null){
+                filename = filename.replace("/","_").replace(" ","_");
+                Files.write(Paths.get(filename), bytesFileStr);
+            }
 
-        filename = filename.replace("/","_").replace(" ","_");
-        Files.write(Paths.get(filename), bytesFileStr);
+            return  filename;
+        }else{
+            return null;
+        }
 
-        return  filename;
     }
 
     public  static  String getFileType(String filename){
@@ -34,10 +41,11 @@ public class TopicProcessing {
     }
 
     public static void sendFile(String filename, String url, String fileType) throws IOException {
+
         AsyncHttpClient client = new DefaultAsyncHttpClient();
         client.prepare("POST", url)
-                .setHeader("Content-Type", "multipart/form-data;")
-                .setBody("Content-Disposition: form-data; name=\"file\"; filename=\""+filename+"\"\r\nContent-Type: application/"+fileType)
+                .setHeader("Content-Type", "multipart/form-data; boundary=---011000010111000001101001")
+                .setBody("-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"file\"; filename=\""+filename+"\"\r\nContent-Type: application/pdf\r\n\r\n\r\n-----011000010111000001101001--\r\n")
                 .execute()
                 .toCompletableFuture()
                 .thenAccept(System.out::println)
@@ -49,7 +57,7 @@ public class TopicProcessing {
         if (myObj.delete()) {
             System.out.println("Deleted the file: " + myObj.getName());
         } else {
-            System.out.println("Failed to delete the file.");
+            System.out.println("Failed to delete the file: " + myObj.getName());
         }
     }
 
@@ -62,8 +70,12 @@ public class TopicProcessing {
 
             JsonObject obj = e.getAsJsonObject();
             String filename = saveTofile(obj);
-            String fileType = getFileType(filename);
-            sendFile(filename,"http://localhost:8000/v1/idx/upload",fileType);
+
+            if (filename != null){
+                String fileType = getFileType(filename);
+                sendFile(filename,"http://localhost:8000/v1/idx/upload",fileType);
+            }
+
 
         }
     }

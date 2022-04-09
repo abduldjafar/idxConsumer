@@ -115,7 +115,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>idx.kafka.consumer.ConsumerExample</mainClass>
+                            <mainClass>idx.kafka.consumer.Consumer</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
