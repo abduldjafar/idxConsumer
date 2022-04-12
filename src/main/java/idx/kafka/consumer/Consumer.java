@@ -14,7 +14,6 @@ import idx.kafka.config.Config;
 public class Consumer {
 
 
-    private static final String TOPIC = "test_openapi_push"; //topic name
     @SuppressWarnings("InfiniteLoopStatement")
 
     public static void main(final String[] args) throws IOException {
@@ -31,8 +30,8 @@ public class Consumer {
         Properties props = config.Kafka(config_file);
 
         try (final KafkaConsumer<String, Value> consumer = new KafkaConsumer<>(props)) {
+
             consumer.subscribe(Collections.singletonList(topic));
-            //ADI is avsc file which contain Avro Schema Format, you can find it in "./src/main/resources/avro/io/confluent/examples/clients/basicavro/"
             while (true) {
                 final ConsumerRecords<String, Value> records = consumer.poll(Duration.ofMillis(100)); //pooling time in ms
                 for (final ConsumerRecord<String, Value> record : records) {

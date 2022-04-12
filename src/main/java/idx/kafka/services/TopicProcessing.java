@@ -11,6 +11,7 @@ import org.asynchttpclient.DefaultAsyncHttpClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -31,7 +32,7 @@ class DataReturn {
 public class TopicProcessing {
 
     public static DataReturn saveTofile(JsonObject obj) throws IOException {
-        byte[] bytesFileStr = obj.get("bytes") != JsonNull.INSTANCE ? obj.get("bytes").getAsString().getBytes() : null;
+        byte[] bytesFileStr = obj.get("bytes") != JsonNull.INSTANCE ? obj.get("bytes").getAsString().getBytes(StandardCharsets.UTF_8) : null;
 
         if (bytesFileStr != null) {
             JsonObject properties = obj.get("properties").getAsJsonObject();
@@ -79,12 +80,14 @@ public class TopicProcessing {
 
         client.close();
 
+
         File myObj = new File(filename);
         if (myObj.delete()) {
             System.out.println("Deleted the file: " + myObj.getName());
         } else {
             System.out.println("Failed to delete the file: " + myObj.getName());
         }
+
     }
 
     public static void run(final ConsumerRecord<String, Value> record, final String url) throws IOException {

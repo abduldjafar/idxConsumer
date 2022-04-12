@@ -19,12 +19,7 @@ public class Config {
 
 
     public static Properties Kafka(String configFile) throws IOException {
-        //Refer to javaschema.config
-        // Load properties from a local configuration file e.g javaschema.config
-        // Create the configuration file (e.g. at '$HOME/.confluent/java.config') with configuration parameters
-        // to connect to your Kafka cluster, which can be on your local host, Confluent Cloud, or any other cluster.
-        // Documentation at https://docs.confluent.io/platform/current/tutorials/examples/clients/docs/java.html
-        // configFile ="/Users/user/IdeaProjects/IdxAttachmentGent/src/main/java/kafka.config";
+
         if (!Files.exists(Paths.get(configFile))) {
             throw new IOException(configFile + " not found.");
         } else {
