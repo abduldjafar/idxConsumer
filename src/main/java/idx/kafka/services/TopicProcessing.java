@@ -5,12 +5,26 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.confluent.connect.jms.Value;
+import org.apache.avro.util.Utf8;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,32 +45,29 @@ class DataReturn {
 
 public class TopicProcessing {
 
-    public static DataReturn saveTofile(JsonObject obj) throws IOException {
-        byte[] bytesFileStr = obj.get("bytes") != JsonNull.INSTANCE ? obj.get("bytes").getAsString().getBytes(StandardCharsets.UTF_8) : null;
+    public  static DataReturn saveToFileFromAvroRecord(Value record) throws IOException {
 
-        if (bytesFileStr != null) {
-            JsonObject properties = obj.get("properties").getAsJsonObject();
-            JsonObject filenameObj = properties.get("idxFileName") != JsonNull.INSTANCE? properties.get("idxFileName").getAsJsonObject():null;
-            Integer idxTotal = properties.get("idxTotal").getAsJsonObject().get("integer").getAsInt();
-            String idxGroupID = properties.get("idxGroupID").getAsJsonObject().get("string").getAsString();
-            Integer idxNumber = properties.get("idxNumber").getAsJsonObject().get("integer").getAsInt();
+        Utf8 groupIDObj =  new Utf8("idxGroupID") ;
+        Utf8 filenameObj =  new Utf8("idxFileName");
+        Utf8 idxNumberObj = new Utf8("idxNumber");
+        Utf8 idxTotalObj = new Utf8("idxTotal");
 
-
-            String filename = filenameObj.get("string") != JsonNull.INSTANCE? filenameObj.get("string").getAsString(): null;
-
-
+        if (record.getBytes() != null){
+            String filename = String.valueOf(record.getProperties().get(filenameObj).getString());
+            Integer idxTotal = record.getProperties().get(idxTotalObj).getInteger();
+            Integer idxNumber = record.getProperties().get(idxNumberObj).getInteger();
+            String idxGroupID = String.valueOf(record.getProperties().get(groupIDObj).getString());
 
 
-            if (filename != null){
-                filename = filename.replace("/","_").replace(" ","_");
-                Files.write(Paths.get(filename), bytesFileStr);
-            }
-
+            filename = filename.replace("/","_").replace(" ","_");
+            System.out.println("process file "+filename+" ....");
+            FileChannel fc = new FileOutputStream(filename).getChannel();
+            fc.write(record.getBytes());
+            fc.close();
             return  new DataReturn(filename,idxGroupID,idxTotal,idxNumber);
         }else{
             return null;
         }
-
     }
 
     public  static  String getFileType(String filename){
@@ -64,41 +75,45 @@ public class TopicProcessing {
     }
 
     public static void sendFile(String filename, String url, String fileType,String idxtotal,String idxnumber,String idxgroup) throws IOException {
+        HttpClient httpclient = new DefaultHttpClient();
+        File file = new File(filename);
+        HttpPost post = new HttpPost(url);
+        FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
+        StringBody stringBody1 = new StringBody(idxgroup, ContentType.MULTIPART_FORM_DATA);
+        StringBody stringBody2 = new StringBody(idxtotal, ContentType.MULTIPART_FORM_DATA);
+        StringBody stringBody3 = new StringBody(idxnumber,ContentType.MULTIPART_FORM_DATA);
+//
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.addPart("file", fileBody);
+        builder.addPart("idxgroup", stringBody1);
+        builder.addPart("idxtotal", stringBody2);
+        builder.addPart("idxnumber",stringBody3);
+        HttpEntity entity = builder.build();
+//
+        post.setEntity(entity);
+        HttpResponse response = httpclient.execute(post);
 
-        AsyncHttpClient client = new DefaultAsyncHttpClient();
-        client.prepare("POST", url)
-                .setHeader("Content-Type", "multipart/form-data; boundary=---011000010111000001101001")
-                //.setBody("-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"file\"; filename=\""+filename+"\"\r\nContent-Type: application/pdf\r\n\r\n\r\n-----011000010111000001101001--\r\n")
-                .setBody("-----011000010111000001101001\r\nContent-Disposition: form-data; name=\"file\"; filename=\""+filename+"\"\r\nContent-Type: application/pdf\r\n\r\n\r\n-----011000010111000001101001\r\n" +
-                        "Content-Disposition: form-data; name=\"idxgroup\"\r\n\r\n"+idxgroup+"\r\n-----011000010111000001101001\r\nContent-Disposition: form-data; " +
-                        "name=\"idxtotal\"\r\n\r\n"+idxtotal+"\r\n-----011000010111000001101001\r\nContent-Disposition: form-data; " +
-                        "name=\"idxnumber\"\r\n\r\n"+idxnumber+"\r\n-----011000010111000001101001--\r\n")
-                .execute()
-                .toCompletableFuture()
-                .thenAccept(System.out::println)
-                .join();
-
-        client.close();
-
-
-        File myObj = new File(filename);
-        if (myObj.delete()) {
-            System.out.println("Deleted the file: " + myObj.getName());
-        } else {
-            System.out.println("Failed to delete the file: " + myObj.getName());
+        if (response.getStatusLine().getStatusCode() == 200) {
+            File myObj = new File(filename);
+            if (myObj.delete()) {
+                System.out.println("Deleted the file: " + myObj.getName());
+            } else {
+                System.out.println("Failed to delete the file: " + myObj.getName());
+            }
+        }else {
+            System.out.println(response.getStatusLine());
         }
+
+
+
 
     }
 
     public static void run(final ConsumerRecord<String, Value> record, final String url) throws IOException {
-        final String key = record.key(); //Prepare consumed key
-        final Value value = record.value(); //Prepare consumed value
 
-        JsonElement e = new JsonParser().parse(value.toString());
-        if (e.isJsonObject()) {
 
-            JsonObject obj = e.getAsJsonObject();
-            DataReturn dataReturn = saveTofile(obj);
+            DataReturn dataReturn = saveToFileFromAvroRecord(record.value());
 
             if (dataReturn != null){
                 String fileType = getFileType(dataReturn.Filename);
@@ -107,6 +122,6 @@ public class TopicProcessing {
             }
 
 
-        }
+
     }
 }

@@ -1,6 +1,7 @@
 package idx.kafka.consumer;
 
 import idx.kafka.services.ParallelTopicProcessing;
+import idx.kafka.services.TopicProcessing;
 import io.confluent.connect.jms.Value;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -18,7 +19,7 @@ public class Consumer {
 
     public static void main(final String[] args) throws IOException {
         if (args.length != 3){
-            System.out.println("please use : java -jar app.jar file_config.config topic_for_consumer_name");
+            System.out.println("please use : java -jar app.jar file_config.config topic_for_consumer_name url_fileserver");
             System.exit(0);
         }
 
@@ -37,6 +38,8 @@ public class Consumer {
                 for (final ConsumerRecord<String, Value> record : records) {
                     ParallelTopicProcessing parallelTopicProcessing = new ParallelTopicProcessing(record,url);
                     parallelTopicProcessing.start();
+                    //TopicProcessing.run(record,url);
+
 
                 }
                 }
