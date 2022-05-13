@@ -28,7 +28,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 class DataReturn {
@@ -98,16 +100,22 @@ public class TopicProcessing {
         HttpResponse response = httpclient.execute(post);
 
         if (response.getStatusLine().getStatusCode() == 200) {
-            File myObj = new File(filename);
-            if(myObj.exists() && !myObj.isDirectory()) {
-                // do something
-                if (myObj.delete()) {
-                    System.out.println("Deleted the file: " + myObj.getName());
-                } else {
-                    System.out.println("Failed to delete the file: " + myObj.getName());
-                }
+            try {
+                Files.deleteIfExists(
+                        Paths.get(filename));
+            }
+            catch (NoSuchFileException e) {
+                System.out.println(
+                        "No such file/directory exists");
+            }
+            catch (DirectoryNotEmptyException e) {
+                System.out.println("Directory is not empty.");
+            }
+            catch (IOException e) {
+                System.out.println("Invalid permissions.");
             }
 
+            System.out.println("Deletion successful.");
         }else {
             System.out.println(response.getStatusLine());
         }
