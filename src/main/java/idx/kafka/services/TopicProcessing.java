@@ -28,9 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 class DataReturn {
@@ -100,22 +98,14 @@ public class TopicProcessing {
         HttpResponse response = httpclient.execute(post);
 
         if (response.getStatusLine().getStatusCode() == 200) {
-            try {
-                Files.deleteIfExists(
-                        Paths.get(filename));
-            }
-            catch (NoSuchFileException e) {
-                System.out.println(
-                        "No such file/directory exists");
-            }
-            catch (DirectoryNotEmptyException e) {
-                System.out.println("Directory is not empty.");
-            }
-            catch (IOException e) {
-                System.out.println("Invalid permissions.");
+            File myObj = new File(filename);
+            if(myObj.exists() && !myObj.isDirectory()) {
+                // do something
+                if (myObj.delete()) {
+                    System.out.println("Deleted the file: " + myObj.getName());
+                }
             }
 
-            System.out.println("Deletion successful.");
         }else {
             System.out.println(response.getStatusLine());
         }
@@ -130,11 +120,16 @@ public class TopicProcessing {
 
             DataReturn dataReturn = saveToFileFromAvroRecord(record.value());
 
-            if (dataReturn != null){
-                String fileType = getFileType(dataReturn.Filename);
-                sendFile(dataReturn.Filename,url,fileType,dataReturn.idxTotal.toString(),dataReturn.idxNumber.toString(),dataReturn.idxGroupId);
-                // "http://localhost:8000/v1/idx/upload"
+            File myObj = new File(dataReturn.Filename);
+            if(myObj.exists() && !myObj.isDirectory()) {
+                // do something
+                if (dataReturn != null){
+                    String fileType = getFileType(dataReturn.Filename);
+                    sendFile(dataReturn.Filename,url,fileType,dataReturn.idxTotal.toString(),dataReturn.idxNumber.toString(),dataReturn.idxGroupId);
+                    // "http://localhost:8000/v1/idx/upload"
+                }
             }
+
 
 
 
