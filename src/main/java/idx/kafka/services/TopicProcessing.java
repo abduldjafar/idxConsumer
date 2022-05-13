@@ -99,11 +99,15 @@ public class TopicProcessing {
 
         if (response.getStatusLine().getStatusCode() == 200) {
             File myObj = new File(filename);
-            if (myObj.delete()) {
-                System.out.println("Deleted the file: " + myObj.getName());
-            } else {
-                System.out.println("Failed to delete the file: " + myObj.getName());
+            if(myObj.exists() && !myObj.isDirectory()) {
+                // do something
+                if (myObj.delete()) {
+                    System.out.println("Deleted the file: " + myObj.getName());
+                } else {
+                    System.out.println("Failed to delete the file: " + myObj.getName());
+                }
             }
+
         }else {
             System.out.println(response.getStatusLine());
         }
