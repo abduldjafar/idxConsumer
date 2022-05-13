@@ -124,6 +124,7 @@ public class TopicProcessing {
             if(myObj.exists() && !myObj.isDirectory()) {
                 // do something
                 if (dataReturn != null){
+                    System.out.println("file exists");
                     String fileType = getFileType(dataReturn.Filename);
                     sendFile(dataReturn.Filename,url,fileType,dataReturn.idxTotal.toString(),dataReturn.idxNumber.toString(),dataReturn.idxGroupId);
                     // "http://localhost:8000/v1/idx/upload"
