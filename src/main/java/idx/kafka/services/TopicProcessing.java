@@ -15,7 +15,9 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -76,6 +78,7 @@ public class TopicProcessing {
 
     public static void sendFile(String filename, String url, String fileType,String idxtotal,String idxnumber,String idxgroup) throws IOException {
         HttpClient httpclient = new DefaultHttpClient();
+        ((AbstractHttpClient) httpclient).setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
         File file = new File(filename);
         HttpPost post = new HttpPost(url);
         FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
