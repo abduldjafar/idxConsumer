@@ -138,7 +138,7 @@ public class TopicProcessing {
                     System.out.println("file exists");
                     System.out.println(dataReturn.Filename);
                     String fileType = getFileType(dataReturn.Filename);
-                    sendFile(dataReturn.Filename,url,fileType,dataReturn.idxTotal.toString(),dataReturn.idxNumber.toString(),dataReturn.idxGroupId);
+                    //sendFile(dataReturn.Filename,url,fileType,dataReturn.idxTotal.toString(),dataReturn.idxNumber.toString(),dataReturn.idxGroupId);
                     // "http://localhost:8000/v1/idx/upload"
                 }
             }
