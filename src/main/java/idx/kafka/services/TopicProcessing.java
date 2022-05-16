@@ -10,14 +10,15 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.AbstractHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.*;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -30,6 +31,9 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 
 class DataReturn {
     String Filename;
@@ -76,8 +80,15 @@ public class TopicProcessing {
         return "pdf";
     }
 
-    public static void sendFile(String filename, String url, String fileType,String idxtotal,String idxnumber,String idxgroup) throws IOException {
-        HttpClient httpclient = new DefaultHttpClient();
+    public static void sendFile(String filename, String url, String fileType,String idxtotal,String idxnumber,String idxgroup) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        SSLContextBuilder builder = new SSLContextBuilder();
+        builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                builder.build());
+        CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(
+                sslsf).build();
+
+        //HttpClient httpclient = new DefaultHttpClient();
         ((AbstractHttpClient) httpclient).setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
         File file = new File(filename);
         HttpPost post = new HttpPost(url);
@@ -86,13 +97,13 @@ public class TopicProcessing {
         StringBody stringBody2 = new StringBody(idxtotal, ContentType.MULTIPART_FORM_DATA);
         StringBody stringBody3 = new StringBody(idxnumber,ContentType.MULTIPART_FORM_DATA);
 //
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        builder.addPart("file", fileBody);
-        builder.addPart("idxgroup", stringBody1);
-        builder.addPart("idxtotal", stringBody2);
-        builder.addPart("idxnumber",stringBody3);
-        HttpEntity entity = builder.build();
+        MultipartEntityBuilder builderm = MultipartEntityBuilder.create();
+        builderm.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builderm.addPart("file", fileBody);
+        builderm.addPart("idxgroup", stringBody1);
+        builderm.addPart("idxtotal", stringBody2);
+        builderm.addPart("idxnumber",stringBody3);
+        HttpEntity entity = builderm.build();
 //
         post.setEntity(entity);
         HttpResponse response = httpclient.execute(post);
@@ -115,7 +126,7 @@ public class TopicProcessing {
 
     }
 
-    public static void run(final ConsumerRecord<String, Value> record, final String url) throws IOException {
+    public static void run(final ConsumerRecord<String, Value> record, final String url) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 
 
             DataReturn dataReturn = saveToFileFromAvroRecord(record.value());
