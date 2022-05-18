@@ -86,10 +86,9 @@ public class TopicProcessing {
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
                 builder.build());
         CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(
-                sslsf).build();
+                sslsf).setRetryHandler(new DefaultHttpRequestRetryHandler(0, false)).build();
 
         //HttpClient httpclient = new DefaultHttpClient();
-        ((AbstractHttpClient) httpclient).setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
         File file = new File(filename);
         HttpPost post = new HttpPost(url);
         FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
