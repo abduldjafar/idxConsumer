@@ -7,6 +7,9 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import java.io.*;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
@@ -17,7 +20,7 @@ public class Consumer {
 
     @SuppressWarnings("InfiniteLoopStatement")
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         if (args.length != 3){
             System.out.println("please use : java -jar app.jar file_config.config topic_for_consumer_name url_fileserver");
             System.exit(0);
@@ -36,9 +39,9 @@ public class Consumer {
             while (true) {
                 final ConsumerRecords<String, Value> records = consumer.poll(Duration.ofMillis(100)); //pooling time in ms
                 for (final ConsumerRecord<String, Value> record : records) {
-                    ParallelTopicProcessing parallelTopicProcessing = new ParallelTopicProcessing(record,url);
-                    parallelTopicProcessing.start();
-                    //TopicProcessing.run(record,url);
+                    //ParallelTopicProcessing parallelTopicProcessing = new ParallelTopicProcessing(record,url);
+                    //parallelTopicProcessing.start();
+                    TopicProcessing.run(record,url);
 
 
                 }
