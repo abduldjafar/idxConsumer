@@ -1,9 +1,5 @@
 package idx.kafka.services;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.confluent.connect.jms.Value;
 import org.apache.avro.util.Utf8;
 import org.apache.http.HttpEntity;
