@@ -129,18 +129,20 @@ public class TopicProcessing {
 
 
             DataReturn dataReturn = saveToFileFromAvroRecord(record.value());
+            if (dataReturn != null){
+                File myObj = new File(dataReturn.Filename);
+                if(myObj.exists() && !myObj.isDirectory()) {
+                    // do something
 
-            File myObj = new File(dataReturn.Filename);
-            if(myObj.exists() && !myObj.isDirectory()) {
-                // do something
-                if (dataReturn != null){
                     System.out.println("file exists");
                     System.out.println(dataReturn.Filename);
                     String fileType = getFileType(dataReturn.Filename);
                     sendFile(dataReturn.Filename,url,fileType,dataReturn.idxTotal.toString(),dataReturn.idxNumber.toString(),dataReturn.idxGroupId);
                     // "http://localhost:8000/v1/idx/upload"
                 }
+
             }
+
 
 
 
