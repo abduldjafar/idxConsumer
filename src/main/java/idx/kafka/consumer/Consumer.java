@@ -17,11 +17,10 @@ import idx.kafka.config.Config;
 
 public class Consumer {
 
-
     @SuppressWarnings("InfiniteLoopStatement")
 
     public static void main(final String[] args) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        if (args.length != 3){
+        if (args.length != 3) {
             System.out.println("please use : java -jar app.jar file_config.config topic_for_consumer_name url_fileserver");
             System.exit(0);
         }
@@ -33,22 +32,18 @@ public class Consumer {
         Config config = new Config();
         Properties props = config.Kafka(config_file);
 
-        try (final KafkaConsumer<String, Value> consumer = new KafkaConsumer<>(props)) {
+        try (final KafkaConsumer < String, Value > consumer = new KafkaConsumer < > (props)) {
 
             consumer.subscribe(Collections.singletonList(topic));
             while (true) {
-                final ConsumerRecords<String, Value> records = consumer.poll(Duration.ofMillis(100)); //pooling time in ms
-                for (final ConsumerRecord<String, Value> record : records) {
+                final ConsumerRecords < String, Value > records = consumer.poll(Duration.ofMillis(100)); //pooling time in ms
+                for (final ConsumerRecord < String, Value > record: records) {
                     //ParallelTopicProcessing parallelTopicProcessing = new ParallelTopicProcessing(record,url);
                     //parallelTopicProcessing.start();
-                    TopicProcessing.run(record,url);
+                    TopicProcessing.run(record, url);
 
-
-                }
                 }
             }
         }
     }
-
-
-
+}
