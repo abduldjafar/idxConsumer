@@ -54,22 +54,28 @@ public class TopicProcessing {
         Utf8 idxNumberObj = new Utf8("idxNumber");
         Utf8 idxTotalObj = new Utf8("idxTotal");
 
-        if (record.getBytes() != null){
-            String filename = String.valueOf(record.getProperties().get(filenameObj).getString());
-            Integer idxTotal = record.getProperties().get(idxTotalObj).getInteger();
-            Integer idxNumber = record.getProperties().get(idxNumberObj).getInteger();
-            String idxGroupID = String.valueOf(record.getProperties().get(groupIDObj).getString());
+        if (record.getMessageType() == "bytes"){
+            if (record.getBytes() != null){
+                String filename = String.valueOf(record.getProperties().get(filenameObj).getString());
+                Integer idxTotal = record.getProperties().get(idxTotalObj).getInteger();
+                Integer idxNumber = record.getProperties().get(idxNumberObj).getInteger();
+                String idxGroupID = String.valueOf(record.getProperties().get(groupIDObj).getString());
 
 
-            filename = filename.replace("/","_").replace(" ","_");
-            System.out.println("process file "+filename+" ....");
-            FileChannel fc = new FileOutputStream(filename).getChannel();
-            fc.write(record.getBytes());
-            fc.close();
-            return  new DataReturn(filename,idxGroupID,idxTotal,idxNumber);
+                filename = filename.replace("/","_").replace(" ","_");
+                System.out.println("process file "+filename+" with idxGroupID "+idxGroupID+"...");
+                FileChannel fc = new FileOutputStream(filename).getChannel();
+                fc.write(record.getBytes());
+                fc.close();
+                return  new DataReturn(filename,idxGroupID,idxTotal,idxNumber);
+            }else{
+                return null;
+            }
         }else{
-            return null;
+            return  null;
         }
+
+
     }
 
     public  static  String getFileType(String filename){
@@ -108,17 +114,13 @@ public class TopicProcessing {
             if(myObj.exists() && !myObj.isDirectory()) {
                 // do something
                 if (myObj.delete()) {
+                    System.out.println("success process "+filename+" with idxGroupID "+idxgroup+"...");
                     System.out.println("Deleted the file: " + myObj.getName());
                 }
             }
-
         }else {
             System.out.println(response.getStatusLine());
         }
-
-
-
-
     }
 
     public static void run(final ConsumerRecord<String, Value> record, final String url) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -129,19 +131,11 @@ public class TopicProcessing {
                 File myObj = new File(dataReturn.Filename);
                 if(myObj.exists() && !myObj.isDirectory()) {
                     // do something
-
-                    System.out.println("file exists");
-                    System.out.println(dataReturn.Filename);
                     String fileType = getFileType(dataReturn.Filename);
                     sendFile(dataReturn.Filename,url,fileType,dataReturn.idxTotal.toString(),dataReturn.idxNumber.toString(),dataReturn.idxGroupId);
                     // "http://localhost:8000/v1/idx/upload"
                 }
 
             }
-
-
-
-
-
     }
 }
