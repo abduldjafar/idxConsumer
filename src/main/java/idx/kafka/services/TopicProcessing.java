@@ -47,7 +47,7 @@ public class TopicProcessing {
         Utf8 idxNumberObj = new Utf8("idxNumber");
         Utf8 idxTotalObj = new Utf8("idxTotal");
 
-        if (record.getMessageType() == "bytes") {
+
             if (record.getBytes() != null) {
                 String filename = String.valueOf(record.getProperties().get(filenameObj).getString());
                 Integer idxTotal = record.getProperties().get(idxTotalObj).getInteger();
@@ -64,11 +64,6 @@ public class TopicProcessing {
             } else {
                 return null;
             }
-        } else {
-            return null;
-        }
-
-
     }
 
     public static String getFileType(String filename) {
