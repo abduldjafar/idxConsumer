@@ -47,12 +47,13 @@ public class TopicProcessing {
         Utf8 idxNumberObj = new Utf8("idxNumber");
         Utf8 idxTotalObj = new Utf8("idxTotal");
 
+        String filename = String.valueOf(record.getProperties().get(filenameObj).getString());
+        String idxGroupID = String.valueOf(record.getProperties().get(groupIDObj).getString());
+
 
             if (record.getBytes() != null) {
-                String filename = String.valueOf(record.getProperties().get(filenameObj).getString());
                 Integer idxTotal = record.getProperties().get(idxTotalObj).getInteger();
                 Integer idxNumber = record.getProperties().get(idxNumberObj).getInteger();
-                String idxGroupID = String.valueOf(record.getProperties().get(groupIDObj).getString());
 
 
                 filename = filename.replace("/", "_").replace(" ", "_");
@@ -62,6 +63,8 @@ public class TopicProcessing {
                 fc.close();
                 return new DataReturn(filename, idxGroupID, idxTotal, idxNumber);
             } else {
+
+                System.out.println("process file " + filename + " with idxGroupID " + idxGroupID + "...");
                 return null;
             }
     }
