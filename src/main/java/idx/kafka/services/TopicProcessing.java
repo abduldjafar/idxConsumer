@@ -30,11 +30,14 @@ class DataReturn {
     String idxGroupId;
     Integer idxTotal;
     Integer idxNumber;
-    DataReturn(String c, String m, Integer d, Integer a) {
+
+    String idxMethod;
+    DataReturn(String c, String m, Integer d, Integer a, String method) {
         Filename = c;
         idxGroupId = m;
         idxTotal = d;
         idxNumber = a;
+        idxMethod = method;
     }
 }
 
@@ -46,6 +49,7 @@ public class TopicProcessing {
         Utf8 filenameObj = new Utf8("idxFileName");
         Utf8 idxNumberObj = new Utf8("idxNumber");
         Utf8 idxTotalObj = new Utf8("idxTotal");
+        Utf8 idxMethodObj = new Utf8("idxMethod");
 
 
 
@@ -55,6 +59,7 @@ public class TopicProcessing {
                 Integer idxTotal = record.getProperties().get(idxTotalObj).getInteger();
                 Integer idxNumber = record.getProperties().get(idxNumberObj).getInteger();
                 String idxGroupID = String.valueOf(record.getProperties().get(groupIDObj).getString());
+                String idxMethod = String.valueOf(record.getProperties().get(idxMethodObj).getString());
 
 
                 filename = filename.replace("/", "_").replace(" ", "_");
@@ -62,7 +67,7 @@ public class TopicProcessing {
                 FileChannel fc = new FileOutputStream(filename).getChannel();
                 fc.write(record.getBytes());
                 fc.close();
-                return new DataReturn(filename, idxGroupID, idxTotal, idxNumber);
+                return new DataReturn(filename, idxGroupID, idxTotal, idxNumber,idxMethod);
             } else {
 
                 return null;
@@ -73,7 +78,7 @@ public class TopicProcessing {
         return "pdf";
     }
 
-    public static void sendFile(String filename, String url, String fileType, String idxtotal, String idxnumber, String idxgroup) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    public static void sendFile(String filename, String url, String fileType, String idxtotal, String idxnumber, String idxgroup, String idxMethod) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         SSLContextBuilder builder = new SSLContextBuilder();
         builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
@@ -88,6 +93,8 @@ public class TopicProcessing {
         StringBody stringBody1 = new StringBody(idxgroup, ContentType.MULTIPART_FORM_DATA);
         StringBody stringBody2 = new StringBody(idxtotal, ContentType.MULTIPART_FORM_DATA);
         StringBody stringBody3 = new StringBody(idxnumber, ContentType.MULTIPART_FORM_DATA);
+        StringBody stringBody4 = new StringBody(idxMethod, ContentType.MULTIPART_FORM_DATA);
+
         //
         MultipartEntityBuilder builderm = MultipartEntityBuilder.create();
         builderm.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -95,6 +102,7 @@ public class TopicProcessing {
         builderm.addPart("idxgroup", stringBody1);
         builderm.addPart("idxtotal", stringBody2);
         builderm.addPart("idxnumber", stringBody3);
+        builderm.addPart("idx_method",stringBody4);
         HttpEntity entity = builderm.build();
         //
         post.setEntity(entity);
@@ -123,7 +131,7 @@ public class TopicProcessing {
             if (myObj.exists() && !myObj.isDirectory()) {
                 // do something
                 String fileType = getFileType(dataReturn.Filename);
-                sendFile(dataReturn.Filename, url, fileType, dataReturn.idxTotal.toString(), dataReturn.idxNumber.toString(), dataReturn.idxGroupId);
+                sendFile(dataReturn.Filename, url, fileType, dataReturn.idxTotal.toString(), dataReturn.idxNumber.toString(), dataReturn.idxGroupId,dataReturn.idxMethod);
                 // "http://localhost:8000/v1/idx/upload"
             }
 
