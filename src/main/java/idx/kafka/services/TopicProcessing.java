@@ -75,7 +75,9 @@ public class TopicProcessing {
     }
 
     public static String getFileType(String filename) {
-        return "pdf";
+        String[] split = filename.split("[.]");
+        String file_type = split[split.length-1];
+        return file_type;
     }
 
     public static void sendFile(String filename, String url, String fileType, String idxtotal, String idxnumber, String idxgroup, String idxMethod) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -131,7 +133,11 @@ public class TopicProcessing {
             if (myObj.exists() && !myObj.isDirectory()) {
                 // do something
                 String fileType = getFileType(dataReturn.Filename);
-                sendFile(dataReturn.Filename, url, fileType, dataReturn.idxTotal.toString(), dataReturn.idxNumber.toString(), dataReturn.idxGroupId,dataReturn.idxMethod);
+
+                System.out.println("file type :"+fileType);
+                if (fileType == "pdf" || fileType =="xlsx"){
+                    sendFile(dataReturn.Filename, url, fileType, dataReturn.idxTotal.toString(), dataReturn.idxNumber.toString(), dataReturn.idxGroupId,dataReturn.idxMethod);
+                }
                 // "http://localhost:8000/v1/idx/upload"
             }
 
