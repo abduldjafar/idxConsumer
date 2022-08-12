@@ -135,7 +135,7 @@ public class TopicProcessing {
                 String fileType = getFileType(dataReturn.Filename);
 
                 System.out.println("file type :"+fileType);
-                if (fileType == "pdf" || fileType =="xlsx"){
+                if (fileType.equals("pdf")  || fileType.equals("xlsx")){
                     sendFile(dataReturn.Filename, url, fileType, dataReturn.idxTotal.toString(), dataReturn.idxNumber.toString(), dataReturn.idxGroupId,dataReturn.idxMethod);
                 }
                 // "http://localhost:8000/v1/idx/upload"
