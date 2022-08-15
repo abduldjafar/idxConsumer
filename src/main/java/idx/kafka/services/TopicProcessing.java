@@ -131,7 +131,6 @@ public class TopicProcessing {
         if (dataReturn != null) {
             File myObj = new File(dataReturn.Filename);
             if (myObj.exists() && !myObj.isDirectory()) {
-                // do something
                 String fileType = getFileType(dataReturn.Filename);
 
                 System.out.println("file type :"+fileType);
